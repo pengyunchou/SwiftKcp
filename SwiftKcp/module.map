@@ -1,0 +1,4 @@
+module ikcp [system] {
+    header "ikcp.h"
+    export *
+}

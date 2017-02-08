@@ -15,5 +15,3 @@ FOUNDATION_EXPORT double SwiftKcpVersionNumber;
 FOUNDATION_EXPORT const unsigned char SwiftKcpVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <SwiftKcp/PublicHeader.h>
-
-

@@ -4,6 +4,11 @@
 <dict>
 	<key>SchemeUserState</key>
 	<dict>
+		<key>KcpDemo.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 		<key>SwiftKcp.xcscheme</key>
 		<dict>
 			<key>orderHint</key>
@@ -18,6 +23,21 @@
 			<true/>
 		</dict>
 		<key>D42AF1FB1E4B19A5008CD16B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D42AF2161E4B1AEE008CD16B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D42AF2291E4B1AEE008CD16B</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>D42AF2341E4B1AEE008CD16B</key>
 		<dict>
 			<key>primary</key>
 			<true/>
