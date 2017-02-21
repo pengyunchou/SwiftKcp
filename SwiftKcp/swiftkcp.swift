@@ -10,27 +10,30 @@ import Foundation
 import ikcp
 
 public protocol KcpOutputer {
-    func kcpOutput() -> Int
+    func kcp(kcp:Kcp,outputData:Data) -> Int
 }
-fileprivate func kcpOutput(a:UnsafePointer<Int8>?,b:Int32,c:UnsafeMutablePointer<IKCPCB>?,d:UnsafeMutableRawPointer?) -> Int32{
-    let obj = Unmanaged<Kcp>.fromOpaque(d!)
-    obj.takeUnretainedValue().test()
-    return 0
+fileprivate func dummyKcpOutput(buf:UnsafePointer<Int8>?,len:Int32,kcp:UnsafeMutablePointer<IKCPCB>?,ud:UnsafeMutableRawPointer?) -> Int32{
+    assert(ud != nil, "user data can not be null")
+    return Unmanaged<Kcp>.fromOpaque(ud!).takeUnretainedValue().kcpOutput(buf: buf, len: len, kcp: kcp, ud: ud)
 }
 public class Kcp {
     fileprivate var kcp:UnsafeMutablePointer<ikcpcb>!
     fileprivate var outputer:KcpOutputer!
     fileprivate static var conv:UInt32 = 0
+    public let identifier:Int
     public init(outputer:KcpOutputer) {
         self.outputer = outputer
         Kcp.conv = Kcp.conv + 1
-        var wself = self
-        kcp = ikcp_create(Kcp.conv, &wself)
-        kcp.pointee.output = kcpOutput
+        self.identifier = Int(Kcp.conv)
+        let pointer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
+        kcp = ikcp_create(Kcp.conv, pointer)
+        kcp.pointee.output = dummyKcpOutput
     }
     
-    func test()  {
-        
+    func kcpOutput(buf:UnsafePointer<Int8>?,len:Int32,kcp:UnsafeMutablePointer<IKCPCB>?,ud:UnsafeMutableRawPointer?) -> Int32{
+        assert(buf != nil, "buffer can not be null")
+        let data = Data(bytes: buf!, count: Int(len))
+        return Int32(self.outputer.kcp(kcp: self, outputData: data))
     }
     public func update(millisec:UInt32){
         ikcp_update(self.kcp, millisec)
@@ -51,7 +54,14 @@ public class Kcp {
     public func recv(bufferLen:Int32 = 1024) -> Data{
         let buffer = UnsafeMutablePointer<Int8>.allocate(capacity: Int(bufferLen))
         let len = ikcp_recv(self.kcp, buffer, bufferLen)
+        if len <= 0{  return Data() }
         return Data(bytes: buffer, count: Int(len))
     }
     
+}
+
+extension Kcp:Equatable{
+    public static func ==(lhs: Kcp, rhs: Kcp) -> Bool{
+        return lhs.identifier == rhs.identifier
+    }
 }
