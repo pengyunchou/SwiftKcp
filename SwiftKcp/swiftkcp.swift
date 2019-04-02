@@ -19,8 +19,13 @@ public class Kcp {
     fileprivate var kcp:UnsafeMutablePointer<ikcpcb>!
     fileprivate var outputer:KcpOutputer!
     public let identifier:Int
-    public init(conv: UInt32) {
+    var recvBuffer: UnsafeMutablePointer<Int8>
+    var recvBufferSize: Int32
+    
+    public init(conv: UInt32, recvBufferSize:Int32 = 1024) {
         self.identifier = Int(conv)
+        self.recvBufferSize = recvBufferSize
+        recvBuffer = UnsafeMutablePointer<Int8>.allocate(capacity: Int(recvBufferSize))
         let pointer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
         kcp = ikcp_create(IUINT32(conv), pointer)
         kcp.pointee.output = dummyKcpOutput
@@ -51,11 +56,10 @@ public class Kcp {
         }
     }
 
-    public func recv(bufferLen:Int32 = 1024) -> Data{
-        let buffer = UnsafeMutablePointer<Int8>.allocate(capacity: Int(bufferLen))
-        let len = ikcp_recv(self.kcp, buffer, bufferLen)
-        if len <= 0{  return Data() }
-        return Data(bytes: buffer, count: Int(len))
+    public func recv() -> Data? {
+        let len = ikcp_recv(self.kcp, recvBuffer, recvBufferSize)
+        if len <= 0 {  return nil }
+        return Data(bytes: recvBuffer, count: Int(len))
     }
     
 }
