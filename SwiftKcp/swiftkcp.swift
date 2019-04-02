@@ -35,6 +35,18 @@ public class Kcp {
         self.outputer = outputer
     }
     
+    public func setMtu(mtu: Int32) -> Int32 {
+        return ikcp_setmtu(kcp, mtu)
+    }
+    
+    public func wndSize(sndwnd: Int32, rcvwnd: Int32) -> Int32 {
+        return ikcp_wndsize(kcp, sndwnd, rcvwnd)
+    }
+    
+    public func noDelay(nodelay: Int32, interval: Int32, resend: Int32, nc: Int32) -> Int32 {
+        return ikcp_nodelay(kcp, nodelay, interval, resend, nc)
+    }
+    
     func kcpOutput(buf:UnsafePointer<Int8>?,len:Int32,kcp:UnsafeMutablePointer<IKCPCB>?,ud:UnsafeMutableRawPointer?) -> Int32{
         assert(buf != nil, "buffer can not be null")
         let data = Data(bytes: buf!, count: Int(len))
