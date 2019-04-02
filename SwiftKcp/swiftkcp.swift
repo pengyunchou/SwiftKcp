@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import ikcp
 
 public protocol KcpOutputer {
     func kcp(kcp:Kcp,outputData:Data) -> Int
@@ -19,15 +18,16 @@ fileprivate func dummyKcpOutput(buf:UnsafePointer<Int8>?,len:Int32,kcp:UnsafeMut
 public class Kcp {
     fileprivate var kcp:UnsafeMutablePointer<ikcpcb>!
     fileprivate var outputer:KcpOutputer!
-    fileprivate static var conv:UInt32 = 0
     public let identifier:Int
-    public init(outputer:KcpOutputer) {
-        self.outputer = outputer
-        Kcp.conv = Kcp.conv + 1
-        self.identifier = Int(Kcp.conv)
+    public init(conv: UInt32) {
+        self.identifier = Int(conv)
         let pointer = UnsafeMutableRawPointer(Unmanaged.passUnretained(self).toOpaque())
-        kcp = ikcp_create(Kcp.conv, pointer)
+        kcp = ikcp_create(IUINT32(conv), pointer)
         kcp.pointee.output = dummyKcpOutput
+    }
+    
+    public func outputer(_ outputer: KcpOutputer) {
+        self.outputer = outputer
     }
     
     func kcpOutput(buf:UnsafePointer<Int8>?,len:Int32,kcp:UnsafeMutablePointer<IKCPCB>?,ud:UnsafeMutableRawPointer?) -> Int32{
@@ -36,7 +36,7 @@ public class Kcp {
         return Int32(self.outputer.kcp(kcp: self, outputData: data))
     }
     public func update(millisec:UInt32){
-        ikcp_update(self.kcp, millisec)
+        ikcp_update(self.kcp, IUINT32(millisec))
     }
     
     public func send(data:Data) -> Int32{

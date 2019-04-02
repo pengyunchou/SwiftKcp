@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ikcp.h"
 
 //! Project version number for SwiftKcp.
 FOUNDATION_EXPORT double SwiftKcpVersionNumber;
